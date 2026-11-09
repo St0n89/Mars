@@ -1,14 +1,25 @@
 # ===========================================================================
-# RUN: first Mars FDTD — TAYAK slice + plane P wave + surface array
+# RUN: Mars FDTD — slanted teleseismic plane P wave through a selectable
+# 1-D Mars model (TAYAK or InSight RF-ensemble crusts), surface array.
 #
-# Usage:  julia -t 2 run_mars.jl
-# Output: mars_run/traces.csv (t + 13 receiver traces),
-#         mars_run/meta.jl   (dt, grid, f0),
-#         mars_frames/       (Float32 snapshots for the movie).
+# Usage:
+#   MARS_MODEL=invA_r3 MARS_SLANT=10 MARS_RUN=runs/invA_r3 \
+#   MARS_TMAX=38 MARS_FRAMES="" julia -t 2 run_mars.jl
+# Env vars:
+#   MARS_MODEL    model name from config/models.jl   (default TAYAK)
+#   MARS_SLANT    plane-wave incidence from vertical, deg (default 10)
+#   MARS_ARRAY_X0 first receiver x, m                (default 53000)
+#   MARS_TMAX     simulation length, s                (default 60)
+#   MARS_RUN      output dir  (default mars_run)
+#   MARS_FRAMES   frame dir, "" disables  (default mars_frames)
+#   MARS_FRAME_EVERY  steps between frames           (default 100)
+# Output: <MARS_RUN>/traces.csv (t + receiver traces) and meta.jl.
 # ===========================================================================
 
-const tmax = 60.0
-const frame_every = 100
+const RUN_DIR    = get(ENV, "MARS_RUN", "mars_run")
+const FRAME_DIR  = get(ENV, "MARS_FRAMES", "mars_frames")
+const FRAME_EVERY = parse(Int, get(ENV, "MARS_FRAME_EVERY", "100"))
+const tmax = parse(Float64, get(ENV, "MARS_TMAX", "60.0"))
 
 t0 = time()
 include("Fdtd2DElastic.jl")
@@ -22,20 +33,20 @@ t0 = time()
 result = run_fdtd(grid, sources, bc, tmax;
     monopoles      = monopoles,
     receivers      = receivers,
-    frame_every    = frame_every,
+    frame_every    = FRAME_EVERY,
     pml_width      = pml_cells,
     f_ref          = f0,
     check_f_max    = check_f_max,
-    frame_dir      = "mars_frames",
-    progress_every = 500,
+    frame_dir      = isempty(FRAME_DIR) ? nothing : FRAME_DIR,
+    progress_every = 1000,
     preflight      = :warn)
 
 runtime = round(time() - t0; digits=1)
 nt = length(result.receiver_traces[1])
 println("Run finished in $(runtime) s: $(nt) steps, dt = $(result.dt) s")
 
-mkpath("mars_run")
-open("mars_run/traces.csv", "w") do io
+mkpath(RUN_DIR)
+open(joinpath(RUN_DIR, "traces.csv"), "w") do io
     hdr = ["t_s"; ["recv_$(round(Int, x[r.x]))_m" for r in receivers]]
     println(io, join(hdr, ","))
     for n in 1:nt
@@ -45,7 +56,12 @@ open("mars_run/traces.csv", "w") do io
     end
 end
 
-open("mars_run/meta.jl", "w") do io
+open(joinpath(RUN_DIR, "meta.jl"), "w") do io
+    println(io, "const model = \"", MODEL, "\"")
+    println(io, "const moho_km = ", MOHO_KM)
+    println(io, "const slant_deg = ", SLANT_DEG)
+    println(io, "const p_slant = ", P_SLANT)
+    println(io, "const x_center = ", X_CENTER)
     println(io, "const dt = ", result.dt)
     println(io, "const nt = ", nt)
     println(io, "const nx = ", nx)
@@ -54,4 +70,4 @@ open("mars_run/meta.jl", "w") do io
     println(io, "const dz = ", dz)
     println(io, "const f0 = ", f0)
 end
-println("Wrote mars_run/traces.csv + meta.jl")
+println("Wrote $(RUN_DIR)/traces.csv + meta.jl")
