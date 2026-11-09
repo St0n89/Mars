@@ -1,0 +1,7 @@
+phase,delay_pred_s,delay_meas_s,delay_err_s,onset_pred_s,onset_meas_s,amp_over_P,peak_env,note
+P,0.000,,,19.984,20.380,1.000,7.346e+00,direct P from 100 km
+Ps7p2,2.291,0.916,-1.374,22.275,21.296,1.014,7.448e+00,inside direct-P coda (unresolved)
+Ps18p4,4.296,7.542,3.246,24.279,27.922,0.445,3.272e+00,inside direct-P coda (unresolved)
+PsPkg,2.191,0.799,-1.392,22.175,21.179,1.014,7.448e+00,inside direct-P coda (unresolved)
+PPmP18p4,11.495,12.631,1.136,31.479,33.011,0.202,1.482e+00,multiple off 18.400000000000002 km, err +1.14 s
+PPmPM,17.980,,,37.964,,0.000,0.000e+00,PPmP Moho multiple

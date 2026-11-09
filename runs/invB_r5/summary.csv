@@ -1,0 +1,2 @@
+model,ensemble,b1_km,b2_km,moho_km,slant_deg,p_pred,p_meas,tP_pred,tP_meas,tP_err,pkg_onset_pred,psm_delay_pred,psm_delay_meas,pkg_err,psm_err,psm_over_P,ppmpm_delay_pred,ppmpm_delay_meas,ppmpm_err,ppmpm_over_P,late_env_ratio
+invB_r5,invB,7.4000,20.0000,42.4000,10.0000,2.9938e-05,2.9970e-05,19.3139,19.3140,1.3119e-04,2.5123,6.8267,1.0075,-1.5048,-5.8192,1.0108,19.0684,,,0.0000e+00,0.1184

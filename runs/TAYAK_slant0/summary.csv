@@ -1,0 +1,2 @@
+model,ensemble,b1_km,b2_km,moho_km,slant_deg,p_pred,p_meas,tP_pred,tP_meas,tP_err,pkg_onset_pred,psm_delay_pred,psm_delay_meas,pkg_err,psm_err,psm_over_P,ppmpm_delay_pred,ppmpm_delay_meas,ppmpm_err,ppmpm_over_P,late_env_ratio
+TAYAK,TAYAK,1.0000,10.0000,77.4000,0.0000e+00,0.0000e+00,0.0000e+00,16.6391,16.6320,-0.0071,9.0136,10.7051,10.5150,1.5014,-0.1901,0.1001,27.1800,27.3117,0.1317,1.0154,1.1248

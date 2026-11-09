@@ -1,0 +1,7 @@
+phase,delay_pred_s,delay_meas_s,delay_err_s,onset_pred_s,onset_meas_s,amp_over_P,peak_env,note
+P,0.000,,,16.472,16.775,1.000,5.456e+00,direct P from 100 km
+Ps1p0,0.273,0.000,-0.273,16.745,16.775,1.000,5.456e+00,inside direct-P coda (unresolved)
+Ps10p0,1.697,0.909,-0.788,18.169,17.685,1.005,5.481e+00,inside direct-P coda (unresolved)
+PsPkg,9.061,10.494,1.433,25.533,27.269,0.100,5.433e-01,Moho conversion package: S->P at 10.0 km (onset) .. PsM 10.76 s, err +1.43 s
+PPmP10p0,4.098,2.600,-1.498,20.570,19.375,1.005,5.481e+00,inside direct-P coda (unresolved)
+PPmPM,26.938,,,43.410,,0.000,0.000e+00,PPmP Moho multiple
