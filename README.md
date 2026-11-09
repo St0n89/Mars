@@ -48,9 +48,10 @@ Arrival onsets measured by cross-correlation against the direct-P wavelet
   oblique incidence (~15-30 deg), so the next experiment slants the plane
   wave with per-source delays.
 
-`analyze_mars.py` (stdlib-only Python, hand-rolled PNG writer) regenerates
-`picks.csv` and `section.png` (record section with predicted arrivals
-overlaid) from `mars_run/traces.csv`.
+`analyze_mars.jl` (pure-stdlib Julia: ray predictions, cross-correlation
+picks, and a hand-rolled PNG writer with CRC32/Adler32 and stored DEFLATE
+blocks, no zlib) regenerates `picks.csv` and `section.png` (record section
+with predicted arrivals overlaid) from `mars_run/traces.csv`.
 
 ## Layout
 
@@ -58,7 +59,7 @@ overlaid) from `mars_run/traces.csv`.
 config/env_mars.jl   TAYAK slice: layers, grid, ElasticGrid
 config/sr_mars.jl    plane-wave line source, pulse, receivers, BCs
 run_mars.jl          driver (writes mars_run/traces.csv + meta.jl)
-analyze_mars.py      ray predictions, cross-correlation picks, PNG
+analyze_mars.jl      ray predictions, cross-correlation picks, PNG
 results/             picks.csv + meta.jl from the validated run
 ```
 
@@ -69,7 +70,7 @@ drop it next to `run_mars.jl` and the configs run unmodified.
 
 ```
 julia -t 2 run_mars.jl     # ~25 s on 2 cores, 121k cells, 4096 steps
-python3 analyze_mars.py
+julia analyze_mars.jl
 ```
 
 ## Next steps
