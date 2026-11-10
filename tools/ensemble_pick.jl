@@ -26,10 +26,20 @@ using Printf
 # copies) or the dataverse API (see file header comments).
 # ===========================================================================
 
+# Data dir: MARS_ENSEMBLE_DATA overrides; else the repo's own data/ dir
+# (this repo carries the two ensemble files); else the original sandbox
+# location. The files are open data from the IPGP dataverse,
+# doi:10.18715/IPGP.2021.kqwc4yaf — see data/README_crust_ensembles.txt.
+const REPO_DATA = normpath(joinpath(@__DIR__, "..", "data"))
 const DATA_DIR = get(ENV, "MARS_ENSEMBLE_DATA",
+                     isdir(REPO_DATA) ? REPO_DATA :
                      "/home/user/knowledge/insight-mars-fdtd/data")
 const INV_A = joinpath(DATA_DIR, "mars_invA_3lay_jointPs_ensemble_N5000_HF.dat")
 const INV_B = joinpath(DATA_DIR, "mars_invB_3lay_jointPs_ensemble_N5000_HF.dat")
+for _f in (INV_A, INV_B)
+    isfile(_f) || error("ensemble data not found: $(_f)\n" *
+        "set MARS_ENSEMBLE_DATA=<dir>, or git pull so the repo data/ dir exists")
+end
 
 q02(d) = round(d / 0.2) * 0.2        # 200 m quantisation, km
 

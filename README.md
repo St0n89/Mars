@@ -199,7 +199,18 @@ results/ensemble_sweep.csv   one summary row per run, all 18 runs
 results/ray_operator.csv     forward operator table (10000 models)
 results/inversion/           posterior CSVs + summary (PNGs regenerate)
 runs/<model>/            summary.csv, picks.csv, meta.jl per run
+data/                   raw InSight RF crust ensembles (invA/invB, open data)
 ```
+
+## Data
+
+`data/` carries the raw ensemble files (invA: 3-layer joint-Ps RF
+inversion, ETH; invB: same, MPS Goettingen; 5000 posterior models each)
+plus the authors' README. Open data from the IPGP dataverse,
+doi:10.18715/IPGP.2021.kqwc4yaf; when using them, cite Knapmeyer-Endrun
+et al. 2021, Science 373. All tools resolve `data/` relative to the repo
+root, so no environment setup is needed; `MARS_ENSEMBLE_DATA=<dir>`
+overrides the location.
 
 Fdtd2DElastic.jl itself lives in a private repo and is not vendored
 here; drop it next to `run_mars.jl` and the configs run unmodified.
