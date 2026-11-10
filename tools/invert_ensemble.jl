@@ -159,21 +159,23 @@ be32(n) = UInt8[(n >> 24) & 255, (n >> 16) & 255, (n >> 8) & 255, n & 255]
 chunk(tag, data) = vcat(be32(length(data)), Vector{UInt8}(tag), data,
                         be32(crc32(vcat(Vector{UInt8}(tag), data))))
 function zlib_stored(raw)
-    a = adler32(raw)
+    out = UInt8[0x78, 0x01]                       # zlib header (CM=8, FLEVEL=0)
     i = 1
-    blocks = UInt8[]
+    n = length(raw)
     while true
-        n = length(raw) - i + 1
-        fin = i + n - 1 >= length(raw)
-        n > 65535 && (n = 65535; fin = false)
-        push!(blocks, fin ? 0x01 : 0x00)
-        append!(blocks, be32(n)[1:2])
-        append!(blocks, be32(n ⊻ 0xffffffff)[1:2])
-        append!(blocks, @view raw[i:i+n-1])
-        i += n
-        fin && break
+        m = min(65535, n - i + 1)
+        final = (i + m - 1 >= n)
+        push!(out, final ? 0x01 : 0x00)
+        push!(out, UInt8(m & 0xff), UInt8((m >> 8) & 0xff))          # LEN little-endian
+        push!(out, UInt8((m ⊻ 0xffff) & 0xff), UInt8(((m ⊻ 0xffff) >> 8) & 0xff))
+        append!(out, raw[i:i+m-1])
+        i += m
+        final && break
     end
-    vcat(blocks, be32(a))
+    a = adler32(raw)
+    push!(out, UInt8((a >> 24) & 0xff), UInt8((a >> 16) & 0xff),
+                 UInt8((a >> 8) & 0xff), UInt8(a & 0xff))
+    out
 end
 function write_png(path, W, H, pix)
     raw = UInt8[]
