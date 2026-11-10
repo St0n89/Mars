@@ -204,13 +204,15 @@ data/                   raw InSight RF crust ensembles (invA/invB, open data)
 
 ## Data
 
-`data/` carries the raw ensemble files (invA: 3-layer joint-Ps RF
-inversion, ETH; invB: same, MPS Goettingen; 5000 posterior models each)
-plus the authors' README. Open data from the IPGP dataverse,
-doi:10.18715/IPGP.2021.kqwc4yaf; when using them, cite Knapmeyer-Endrun
-et al. 2021, Science 373. All tools resolve `data/` relative to the repo
-root, so no environment setup is needed; `MARS_ENSEMBLE_DATA=<dir>`
-overrides the location.
+`data/` carries the invB ensemble file (MPS Goettingen joint-Ps
+RF-inversion, 5000 posterior models) plus the authors' README,
+vendored directly. The invA file (ETH, 3.7 MB) is not committed;
+fetch it once with `julia tools/fetch_data.jl`, which downloads both
+files from the IPGP dataverse into `data/` and skips anything
+already present. Open data, doi:10.18715/IPGP.2021.kqwc4yaf; when
+using them, cite Knapmeyer-Endrun et al. 2021, Science 373. All
+tools resolve `data/` relative to the repo root, so no environment
+setup is needed; `MARS_ENSEMBLE_DATA=<dir>` overrides the location.
 
 Fdtd2DElastic.jl itself lives in a private repo and is not vendored
 here; drop it next to `run_mars.jl` and the configs run unmodified.
