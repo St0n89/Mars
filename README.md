@@ -137,6 +137,52 @@ Practical rules that fell out of it:
   apparent slowness, 17x steeper than the plane-wave phases, so a
   delay-vs-x profile separates them immediately.
 
+## Experiment 4 — synthetic recovery inversion over the published posterior
+
+The sweep is now inverted. Architecture: the 10000 published posterior
+models (invA + invB) ARE the model space, uniform prior; the forward
+operator is pure ray theory (`tools/ray_operator.jl`) over every model
+(validated: it reproduces the FDTD member predictions exactly, e.g.
+invA_r8 package onset 5.9442 s, PsM 10.5825 s, PPmPM 26.3971 s); the data
+are the actual picks from the FDTD sweep, so the chain is end-to-end:
+solver -> matched filter -> inversion.
+
+Likelihood (tools/invert_ensemble.jl): a detection model for censoring.
+A model whose package onset clears the 5.5 s coda is picked with
+probability 0.95; the pick delay is compared with sigma 1.2 s (absorbs the
+0.0-1.4 s structure-dependent matched-filter bias measured in the sweep);
+the moveout slowness enters with sigma 2%. Where the deepest-interface Ps
+delay was also resolvable, it is added as a second observable.
+
+Operator headline: only 475 of 10000 posterior models (4.75%, Moho
+44.4-79.2 km) produce a separable conversion package at 0.5 Hz.
+
+Recovery (full table: `results/inversion/inversion_summary.csv`,
+posterior per scenario: `results/inversion/<truth>_posterior.csv`,
+regenerate plots with `julia tools/invert_ensemble.jl`):
+
+| truth    | Moho (km) | data                      | mode (km) | 95% CI (km)    | P(resolvable) |
+|----------|-----------|---------------------------|-----------|----------------|---------------|
+| invA_r8  | 69.4      | pkg pick @ 6.21 s         | 67.5      | [47.5, 68.5]   | 0.91          |
+| invB_r8  | 76.4      | pkg @ 5.63 + Ps@b2 @ 8.28 | 76.5      | [42.5, 79.5]   | 0.80          |
+| invB_r5  | 42.4      | no pick                   | 41.5      | [33.5, 58.5]   | 0.001         |
+| invA_r1  | 14.8      | no pick                   | 37.5      | [19.5, 57.5]   | 0.003         |
+
+Reading it honestly:
+
+- Thick crust is recovered: with a package pick plus the deepest-Ps
+  delay the posterior mode lands on the truth (76.5 vs 76.4 km).
+  With a single delay the Moho marginal stays ~15 km wide and the truth
+  sits at the 95% edge: package onset trades off Moho depth against the
+  deepest interface depth, so one delay cannot pin both.
+- The no-pick case is informative, not empty: it excludes the resolvable
+  subset outright (P(resolvable) 0.001-0.003). "No Moho conversion
+  package at 0.5 Hz" caps the crust at ~58 km (95%).
+- invA_r1 (Moho 14.8 km) is not recovered because the prior itself barely
+  samples Moho < 20 km: the data cannot resurrect what the ensemble
+  posterior does not contain. That is the thick-crust bias of the
+  published inversions, reproduced by construction.
+
 ## Layout
 
 ```
@@ -145,9 +191,13 @@ config/sr_mars.jl        plane-wave line source, taper, receivers, BCs
 config/models.jl         TAYAK layers + merge of the ensemble members
 config/models_gen.jl     GENERATED ensemble members (tools/ensemble_pick.jl)
 tools/ensemble_pick.jl   invA/invB parser: 5000-model ensembles -> 8+8 members
+tools/ray_operator.jl    ray forward operator over all 10000 posterior models
+tools/invert_ensemble.jl ensemble-space inversion (censored likelihood, PNG)
 run_mars.jl              driver (MARS_MODEL / MARS_SLANT / MARS_TMAX env vars)
 analyze_mars.jl          slant ray predictions, matched-filter picks, PNG
 results/ensemble_sweep.csv   one summary row per run, all 18 runs
+results/ray_operator.csv     forward operator table (10000 models)
+results/inversion/           posterior CSVs + summary (PNGs regenerate)
 runs/<model>/            summary.csv, picks.csv, meta.jl per run
 ```
 
@@ -166,6 +216,9 @@ MARS_MODEL=invA_r8 MARS_RUN=runs/invA_r8 MARS_TMAX=38 julia -t 2 run_mars.jl
 MARS_RUN=runs/invA_r8 julia analyze_mars.jl
 
 julia tools/ensemble_pick.jl                # regenerate models_gen.jl
+
+julia tools/ray_operator.jl                # forward operator, 10000 models (~20 s)
+julia tools/invert_ensemble.jl              # 4 recovery scenarios + PNGs (~5 s)
 ```
 
 ## Next steps
@@ -174,11 +227,12 @@ julia tools/ensemble_pick.jl                # regenerate models_gen.jl
    sol 1256) from the NASA PDS GeoCSV archive, plus a hand-written
    miniSEED decoder for the IPGP FDSN service. The MQS catalog v14 and
    featured-event GeoCSV/mSEED pairs give free decoder validation.
-2. Shorter pulse / higher f0 to sharpen the package onset and pull the
-   thin-crust members out of the P coda (bounded by grid resolution:
-   min_ppw=6 at 1 Hz on this grid).
-3. Invert: the sweep is the forward operator; feed measured delays and
-   package shapes back into the ensemble posterior.
+2. Shorter pulse / higher f0 to sharpen the package onset: pulls more of
+   the 95% unresolvable posterior into the measurable set and widens the
+   inversion's usable data (bounded by grid resolution: min_ppw=6 at
+   1 Hz on this grid).
+3. Invert real RF picks (S0173a / S0235b) with the same operator instead
+   of synthetic truths.
 
 ## References
 

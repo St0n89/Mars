@@ -143,6 +143,7 @@ function emit(models; tag, fh)
     return [models[i] for i in idx]
 end
 
+if abspath(PROGRAM_FILE) == @__FILE__   # script mode: regenerate models_gen.jl
 A = parse_invA(INV_A)
 B = parse_invB(INV_B)
 @printf("parsed: %d invA models, %d invB models\n", length(A), length(B))
@@ -165,3 +166,4 @@ const ENSEMBLE_BOUNDS = merge(ENSEMBLE_BOUNDS_invA, ENSEMBLE_BOUNDS_invB)
 """)
 end
 println("wrote config/models_gen.jl")
+end                                     # script mode
