@@ -193,6 +193,7 @@ config/models_gen.jl     GENERATED ensemble members (tools/ensemble_pick.jl)
 tools/ensemble_pick.jl   invA/invB parser: 5000-model ensembles -> 8+8 members
 tools/ray_operator.jl    ray forward operator over all 10000 posterior models
 tools/invert_ensemble.jl ensemble-space inversion (censored likelihood, PNG)
+tools/plot_models.jl     range/depth model slice (layers, Moho, array, source)
 run_mars.jl              driver (MARS_MODEL / MARS_SLANT / MARS_TMAX env vars)
 analyze_mars.jl          slant ray predictions, matched-filter picks, PNG
 results/ensemble_sweep.csv   one summary row per run, all 18 runs
@@ -217,7 +218,9 @@ setup is needed; `MARS_ENSEMBLE_DATA=<dir>` overrides the location.
 Fdtd2DElastic.jl itself lives in a private repo and is not vendored
 here; drop it next to `run_mars.jl` and the configs run unmodified.
 Section PNGs regenerate with `analyze_mars.jl` (they are binary, so
-they are not committed).
+they are not committed), the inversion posterior figures with
+`tools/invert_ensemble.jl` and range/depth model slices with
+`tools/plot_models.jl` into `results/models/`.
 
 ## Reproduce
 
@@ -232,6 +235,7 @@ julia tools/ensemble_pick.jl                # regenerate models_gen.jl
 
 julia tools/ray_operator.jl                # forward operator, 10000 models (~20 s)
 julia tools/invert_ensemble.jl              # 4 recovery scenarios + PNGs (~5 s)
+julia tools/plot_models.jl                 # range/depth slices, results/models/
 ```
 
 ## Next steps
