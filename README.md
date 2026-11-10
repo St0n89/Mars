@@ -1,5 +1,8 @@
 # Mars FDTD — synthetic seismograms with a hand-written elastic solver
 
+> 2-D tomography feasibility: the MQS catalog cannot support it; the
+> numbers are in `results/tomo/` (see "Tomography feasibility" below).
+
 Forward-modeling experiments from the "Mars open data" track: teleseismic
 plane P waves sent through the Martian crust at the InSight landing site,
 computed with a private 2-D elastic FDTD solver (Fdtd2DElastic.jl,
@@ -194,11 +197,13 @@ tools/ensemble_pick.jl   invA/invB parser: 5000-model ensembles -> 8+8 members
 tools/ray_operator.jl    ray forward operator over all 10000 posterior models
 tools/invert_ensemble.jl ensemble-space inversion (censored likelihood, PNG)
 tools/plot_models.jl     range/depth model slice (layers, Moho, array, source)
+tools/ray_fan.jl         P ray fan through TAYAK for the located MQS events
 run_mars.jl              driver (MARS_MODEL / MARS_SLANT / MARS_TMAX env vars)
 analyze_mars.jl          slant ray predictions, matched-filter picks, PNG
 results/ensemble_sweep.csv   one summary row per run, all 18 runs
 results/ray_operator.csv     forward operator table (10000 models)
 results/inversion/           posterior CSVs + summary (PNGs regenerate)
+results/tomo/                event geometry, ray fan, observed P times
 runs/<model>/            summary.csv, picks.csv, meta.jl per run
 data/                   raw InSight RF crust ensembles (invA/invB, open data)
 ```
@@ -222,6 +227,10 @@ they are not committed), the inversion posterior figures with
 `tools/invert_ensemble.jl` and range/depth model slices with
 `tools/plot_models.jl` into `results/models/`.
 
+`data/TAYAK.mod` is the spherical Martian reference model (Khan et al.
+2016), vendored as plain text for `tools/ray_fan.jl`; same open
+dataverse, doi:10.18715/IPGP.2021.kqwc4yaf.
+
 ## Reproduce
 
 ```
@@ -236,7 +245,40 @@ julia tools/ensemble_pick.jl                # regenerate models_gen.jl
 julia tools/ray_operator.jl                # forward operator, 10000 models (~20 s)
 julia tools/invert_ensemble.jl              # 4 recovery scenarios + PNGs (~5 s)
 julia tools/plot_models.jl                 # range/depth slices, results/models/
+julia tools/ray_fan.jl                     # P ray fan, results/tomo/ (~1 s)
 ```
+
+## Tomography feasibility
+
+Can the InSight event catalog support 2-D tomography? No. The
+numbers are in `results/tomo/` (regenerate with `tools/ray_fan.jl`):
+
+- The MQS catalog v14 has 2715 events with origins, but 2691 of them
+  are unlocated: they are pinned exactly at the InSight coordinates,
+  distance 0. Only 24 events have a location at all.
+- 47 events have P picks; 22 of the located ones sit within P reach
+  (27.5 to 73.3 deg). Two beyond 90 deg (S0976a, S1000a) were excluded
+  as core-phase (PKP/PP) territory.
+- 21 of the 22 usable events cluster in one azimuth wedge (back azimuth
+  44 to 137 deg, E-ESE toward Cerberus Fossae); one outlier sits at
+  286 deg (S1102a).
+- Ray tracing through TAYAK (exact earth-flattening transform, closed
+  per-layer integrals, multi-branch first-arrival selection): the first
+  arrival of all 21 wedge events is the same Pn head wave along the
+  Moho (critical incidence 29.0 deg, velocity jump 5.85 to 7.40 km/s).
+  All 21 rays are effectively identical; they pierce the Moho between
+  42.5 and 93.5 km offset from the station, about one Fresnel zone.
+  One event (S1102a, 73.3 deg) turns as a mantle P at 1015 km depth.
+- Observed P times from the catalog picks: 211 s at 27.5 deg, 266 s
+  at 37 deg, 489 s at 73.3 deg. TAYAK Pn runs 19% slow against them
+  (mean residual -45 s, rms 48 s): TAYAK is a pre-landing model, so
+  this is expected, not a tracer bug. The empirical dT/dDelta of
+  6.5 s/deg puts the true Moho incidence near 24 deg.
+
+One station, 24 located events, 21 of 22 first arrivals on the same
+critical ray in one azimuth wedge: 2-D tomography cannot separate
+lateral from vertical structure here. The 1-D ensemble inversion
+(experiment 4) is the experiment the data actually supports.
 
 ## Next steps
 
